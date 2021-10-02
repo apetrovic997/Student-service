@@ -1,0 +1,86 @@
+{% extends 'studserviceapp/BasedAdmin.html' %}
+{% block content %}
+
+    <form action="{% url 'saveizbornagrupa' nalog.username %}" method="post">
+        {% csrf_token %}
+
+        <label>Izbor parnosti</label>
+        <select name="vrsta">
+            <option value="parni">parni</option>
+            <option value="neparni">neparni</option>
+        </select><br><br>
+
+        <label>Pocetak semestra</label>
+        <textarea rows="1" cols="10" name="skolska_godina_pocetak"></textarea><br><br>
+
+        <label>Kraj semestra</label>
+        <textarea rows="1" cols="10" name="skolska_godina_kraj"></textarea><br><br>
+
+        <label>Oznaka semestra</label>
+        <input name="oznaka_semestra" type="text" id="oznaka_semestra" style="width: 200px"><br><br>
+
+        <label>Oznaka grupe</label>
+        <textarea rows="1" cols="10" name="oznaka_grupe"></textarea><br><br>
+
+        <label>Kapacitet</label>
+        <textarea rows="1" cols="10" name="kapacitet"></textarea><br><br>
+
+        <label>Smer</label>
+        <textarea rows="1" cols="10" name="smer"></textarea><br><br>
+
+        <input type="checkbox" name="aktivna" value=True> Aktivna<br>
+
+        <select id="predmeti" name="predmeti" multiple>
+        {%  for p in predmeti %}
+            <option value={{ p.id }} >{{ p }}</option>
+        {% endfor %}
+        </select>
+
+        <input type="submit" value="Snimi i dodaj novu">
+    </form>
+    <script>
+        jQuery.fn.filterByText = function(textbox) {
+  return this.each(function() {
+    var select = this;
+    var options = [];
+    var pomocna = 0;
+    $(select).find('option').each(function() {
+        var k=0;
+        {% for p in predmeti %}
+            if(k==pomocna) {
+                var semestar = "{{ p.semestar_po_programu }}";
+            }
+            k++;
+        {% endfor %}
+      options.push({
+        value: $(this).val(),
+        text: $(this).text(),
+          s: semestar
+      });
+      pomocna++;
+    });
+    $(select).data('options', options);
+    $(textbox).bind('change keyup', function() {
+      var options = $(select).empty().data('options');
+      var search = $.trim($(this).val());
+      var regex = new RegExp(search, "gi");
+
+      $.each(options, function(i) {
+        var option = options[i];
+        if (option.s.match(regex) !== null) {
+          $(select).append(
+            $('<option>').text(option.text).val(option.value)
+          );
+        }
+      });
+    });
+  });
+};
+
+
+
+$(function() {
+  $('#predmeti').filterByText($('#oznaka_semestra'));
+});
+    </script>
+{% endblock %}

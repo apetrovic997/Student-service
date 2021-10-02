@@ -1,0 +1,122 @@
+{% extends 'studserviceapp/BasedStudent.html' %}
+{% block content %}
+    <form action="{% url 'sacuvajizborgrupe' nalog.username%}" method="post">
+        {% csrf_token %}
+
+        <textarea cols="1" rows="10" name="studentID" style="display:none; "> {{ student.id }}</textarea>
+
+        <label>Indeks</label>
+        <textarea disabled rows="1" cols="10" name="smer">{{ student.smer }}</textarea>
+        <textarea disabled rows="1" cols="10" name="broj_indeksa">{{ student.broj_indeksa }}</textarea>
+        <textarea disabled rows="1" cols="10" name="godina_upisa">{{ student.godina_upisa }}</textarea><br><br>
+
+        <label>Ime</label>
+        <textarea disabled rows="1" cols="10" name="ime">{{ student.ime }}</textarea><br><br>
+
+        <label>Prezime</label>
+        <textarea disabled rows="1" cols="10" name="prezime">{{ student.prezime }}</textarea><br><br>
+
+        <label>Broj do sada ukupno ostvarenih ESPB</label>
+        <textarea rows="1" cols="10" name="ostvarenoESPB"></textarea><br><br>
+
+        <label>Skolse {{ semestar.skolska_godina_pocetak }} / {{ semestar.skolska_godina_kraj }} godine upisujem ESPB</label>
+        <textarea rows="1" cols="10" name="upisujeESPB"></textarea><br><br>
+
+        <label>Broj do sada polozenih ispita</label>
+        <textarea rows="1" cols="10" name="broj_polozenih_ispita"></textarea><br><br>
+
+        <label>Semestar</label>
+         {%  if semestar.vrsta == 'parni' %}
+             <input type="radio" name="upisuje_semestar" id="us1" value={{ 2 }}> 2
+             <input type="radio" name="upisuje_semestar" id="us2" value={{ 4 }}> 4
+             <input type="radio" name="upisuje_semestar" id="us3" value={{ 6 }}> 6
+             <input type="radio" name="upisuje_semestar" id="us4" value={{ 8 }}> 8<br><br>
+        {% else %}
+             <input type="radio" name="upisuje_semestar" id="us1" value={{ 1 }}> 1
+             <input type="radio" name="upisuje_semestar" id="us2" value={{ 3 }}> 3
+             <input type="radio" name="upisuje_semestar" id="us3" value={{ 5 }}> 5
+             <input type="radio" name="upisuje_semestar" id="us4" value={{ 7 }}> 7<br><br>
+        {% endif %}
+
+        <label>Prvi put upisuje</label>
+        <input type="radio" name="prvi_put_upisuje_semestar" value=True> DA
+        <input type="radio" name="prvi_put_upisuje_semestar" value=False> NE<br><br>
+
+        <label>Grupa koju student bira</label>
+        <select name="izabrana_grupa" id="ig">
+        {%  for g in lista %}
+            <option value={{ g.id }} >{{ g.oznaka_grupe }}</option>
+        {% endfor %}
+        </select><br><br>
+
+        <label>Nepolozeni predmeti iz prethodnih godina</label>
+        <select name="nepolozeni_predmeti" id="nepolozeni_predmeti" multiple>
+        {%  for p in predmeti %}
+            <option value={{ p.id }} >{{ p }}</option>
+        {% endfor %}
+
+        </select><br><br>
+
+        <label>Nacin pracanja</label>
+        <input type="radio" name="nacin_placanja" value="Odjednom">Odjednom
+        <input type="radio" name="nacin_placanja" value="Stipendista">Stipendista
+        <input type="radio" name="nacin_placanja" value="Na rate">Na rate<br><br>
+
+        <input type="submit" value="Sacuvaj">
+    </form>
+    <script>
+jQuery.fn.filterByText = function(textbox) {
+  return this.each(function() {
+    var select = this;
+    var options = [];
+    var pomocna = 0;
+    $(select).find('option').each(function() {
+        var k=0;
+        {% for g in lista %}
+            if(k==pomocna) {
+                var semestar = "{{ g.oznaka_semestra }}";
+            }
+            k++;
+        {% endfor %}
+      options.push({
+        value: $(this).val(),
+        text: $(this).text(),
+          s: semestar
+      });
+      pomocna++;
+    });
+    $(select).data('options', options);
+    $(textbox).bind('change keyup', function() {
+      var options = $(select).empty().data('options');
+      var search = $.trim($(this).val());
+      var regex = new RegExp(search, "gi");
+
+
+      $.each(options, function(i) {
+        var option = options[i];
+        if (option.s.match(regex) !== null) {
+          $(select).append(
+            $('<option>').text(option.text).val(option.value)
+          );
+        }
+      });
+    });
+  });
+};
+
+
+
+$(function() {
+  $('#ig').filterByText($('#us1'));
+});
+$(function() {
+  $('#ig').filterByText($('#us2'));
+});
+$(function() {
+  $('#ig').filterByText($('#us3'));
+});
+$(function() {
+  $('#ig').filterByText($('#us4'));
+});
+    </script>
+{% endblock %}
